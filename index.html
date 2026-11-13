@@ -320,7 +320,8 @@ body.edit .adm-toggle{background:#c49a86;color:#fff}
 #ptr.go svg{animation:ptrspin .7s linear infinite}
 @keyframes ptrspin{to{transform:rotate(360deg)}}
 /* на весь экран: без полос по краям, с учётом выреза и строки состояния */
-html,body{width:100%;overflow-x:hidden}
+html,body{width:100%;overflow-x:clip}
+@supports not (overflow-x:clip){body{overflow-x:hidden}}
 .wrap,.tc,.tcwrap,.drawer{max-width:none!important}
 /* iPhone Duo: справа отступ под вырез не делаем (как в Коране) — контент до края; слева вырез учитываем только в горизонтальном положении */
 .wrap{padding-left:20px;padding-right:20px}
@@ -943,6 +944,15 @@ function route(){
   }
 }
 window.addEventListener("hashchange", route);
+/* при открытии/обновлении главной — всегда с самого верха страницы, а не с «Выберите категорию» */
+try{ history.scrollRestoration = "manual"; }catch(e){}
+(function(){
+  const h = decodeURIComponent(location.hash.slice(1));
+  if(!h || ["showcase","top","how","contacts"].includes(h)){
+    if(h) history.replaceState(null, "", location.pathname + location.search);
+    window.scrollTo(0,0); addEventListener("load", ()=>window.scrollTo(0,0));
+  }
+})();
 function renderAll(){ renderCats(); renderRail(); if(curCat) renderCatPage(); renderBag(); }
 
 /* ---------- прокрутка витрины ---------- */
@@ -1544,7 +1554,7 @@ renderAll(); renderContacts();
   });
 })();
 /* автообновление: если на сайте вышла новая версия — сразу загрузить её, без старой копии из кэша */
-const BUILD = "20261114012102";
+const BUILD = "20261114012310";
 async function checkNewVersion(){
   if(!GH) return;
   try{
