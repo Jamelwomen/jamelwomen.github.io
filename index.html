@@ -1409,6 +1409,13 @@ $("#loginForm").addEventListener("submit", async e=>{
 
 renderTopCats(); buildArc();
 renderAll(); renderContacts();
+/* ссылка владельца: …/#k=КЛЮЧ — один раз сохраняет ключ на этом телефоне */
+(function(){
+  const m = location.hash.match(/^#k=([\w-]+)/); if(!m || !GH) return;
+  try{ localStorage.setItem("jw_gh", m[1]); }catch(e){}
+  history.replaceState(null, "", location.pathname + location.search);
+  setTimeout(()=>{ setLogged(true); toast("Ключ сохранён на этом телефоне ✓"); }, 300);
+})();
 route();
 loadSiteData();
 try{ if(sessionStorage.getItem("jw_admin")) setLogged(true); }catch(e){}
