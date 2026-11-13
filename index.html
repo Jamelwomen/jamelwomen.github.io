@@ -1031,6 +1031,8 @@ function updNote(){
   const n = $("#admNote"); if(!n) return;
   n.hidden = !EDIT; if(!EDIT) return;
   const ok = GH ? !!GH_TOKEN() : (SERVER || (ART && ASSETS));
+  const problem = /ошибк|не подходит|нет связи|недоступ/i.test((STORE.photo||"") + " " + (STORE.save||""));
+  if(GH && ok && !problem){ n.hidden = true; return; }   // всё работает — окошко не показываем
   const lines = GH ? [GH_TOKEN() ? "GitHub: подключено ✓ — изменения видят все через 1–2 мин" : "GitHub не подключён — фото и товары не сохранятся"] : SERVER ? ["Сервер сайта: подключено ✓ — фото и товары видят все покупатели"] : [
     "Хранилище фото: " + (ASSETS ? "подключено ✓" : STORE.ready ? "недоступно" : "подключаюсь…"),
     "Сохранение сайта: " + (ART ? "подключено ✓" : STORE.ready ? "недоступно" : "подключаюсь…")
@@ -1039,7 +1041,7 @@ function updNote(){
   if(STORE.save) lines.push("Последнее сохранение: " + STORE.save);
   n.className = "adm-note" + (STORE.ready && !ok ? " bad" : "");
   n.innerHTML = "<b>" + (STORE.ready && !ok ? "Здесь сохранение для покупателей не работает" : "Режим редактирования") + "</b>" + lines.join("<br>") +
-    (GH ? `<br><button class="adm ghbtn" data-adm="ghkey" type="button">${GH_TOKEN() ? "Сменить ключ GitHub" : "Подключить GitHub"}</button>` :
+    (GH ? `<br><button class="adm ghbtn" data-adm="ghkey" type="button">${GH_TOKEN() ? "Вставить новый ключ GitHub" : "Подключить GitHub"}</button>` :
      (STORE.ready && !ok ? "<br><i>Сохранение для всех работает, когда сайт выложен на GitHub Pages или Netlify.</i>" : ""));
 }
 let DATA = {catImg:{}, prodImg:{}, products:[], edits:{}, removed:[], shop:{}, order:{}};
@@ -1209,7 +1211,7 @@ async function uploadPhoto(file){
   return cv.toDataURL("image/jpeg", 0.8);
 }
 function admBar(p){ return `<div class="adm-bar"><button class="adm" data-adm="photo" data-pid="${p.id}">📷<span class="tx"> Фото</span></button><button class="adm" data-adm="edit" data-pid="${p.id}">✎<span class="tx"> Изменить</span></button><button class="adm" data-adm="del" data-pid="${p.id}">🗑</button></div><div class="adm-mv"><button class="adm" data-adm="left" data-pid="${p.id}" aria-label="Левее">←</button><button class="adm" data-adm="right" data-pid="${p.id}" aria-label="Правее">→</button></div>`; }
-function setEdit(on){ EDIT=on; document.body.classList.toggle("edit",on); $("#exportBtn").hidden = !on;
+function setEdit(on){ EDIT=on; document.body.classList.toggle("edit",on); $("#exportBtn").hidden = !on || !!GH;
   updNote(); rerenderSite(); toast(on?"Режим редактирования — можно менять фото и товары":"Вы вышли"); }
 document.addEventListener("click", async e=>{
   const b = e.target.closest && e.target.closest(".adm"); if(!b || !EDIT) return;
