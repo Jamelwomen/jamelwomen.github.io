@@ -311,6 +311,11 @@ body.edit .adm-toggle{background:#c49a86;color:#fff}
 .cedit{margin-top:14px;padding:8px 16px;border-radius:999px;border:1.5px dashed #c49a86;background:#fffaf6;font-weight:600;font-size:13px}
 .ord{width:100%;justify-content:center;margin-top:8px;padding:13px}
 .ord svg{width:19px;height:19px;flex:none}
+/* обновление свайпом вниз (сайт, сохранённый на экран «Домой») */
+#ptr{position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;width:40px;height:40px;margin-left:-20px;border-radius:50%;background:#fff;box-shadow:0 6px 18px -6px rgba(59,36,24,.4);display:grid;place-items:center;z-index:2000;transform:translateY(-70px);opacity:0;transition:transform .25s,opacity .25s;pointer-events:none;color:var(--ink)}
+#ptr svg{width:20px;height:20px}
+#ptr.go svg{animation:ptrspin .7s linear infinite}
+@keyframes ptrspin{to{transform:rotate(360deg)}}
 /* якоря не уходят под шапку */
 section{scroll-margin-top:150px}
 #showcase{scroll-margin-top:1000px}
@@ -517,6 +522,7 @@ textarea{resize:vertical;min-height:70px}
 <button class="btn btn-p" type="submit" style="justify-content:center;padding:12px">Войти</button></form></div></div>
 <div class="modal" id="loginModal"><div class="mbox"><button class="x" id="loginX" type="button" style="position:absolute;top:14px;right:14px">✕</button><h3 style="font-size:32px">Вход</h3><p class="note">Для владельца магазина</p>
 <form id="loginForm" novalidate><label>Пароль<input id="lPwd" type="password" inputmode="numeric" autocomplete="current-password"></label><div class="err" id="lErr"></div><button class="btn btn-p" type="submit" style="justify-content:center">Войти</button></form></div></div>
+<div id="ptr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4.5h-4.5"/></svg></div>
 <div class="toast" id="toast"></div>
 
 <script type="application/json" id="siteData">{}</script>
@@ -1420,6 +1426,29 @@ renderAll(); renderContacts();
   try{ localStorage.setItem("jw_gh", m[1]); }catch(e){}
   history.replaceState(null, "", location.pathname + location.search);
   setTimeout(()=>{ setLogged(true); toast("Ключ сохранён на этом телефоне ✓"); }, 300);
+})();
+/* свайп вниз в самом верху страницы — обновить (только когда сайт открыт с экрана «Домой») */
+(function(){
+  const standalone = window.navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+  if(!standalone) return;
+  const el = $("#ptr"); let y0 = 0, dy = 0, active = false;
+  addEventListener("touchstart", e=>{
+    active = window.scrollY <= 0 && e.touches.length === 1 && !document.querySelector(".modal.on");
+    if(active){ y0 = e.touches[0].clientY; dy = 0; }
+  }, {passive: true});
+  addEventListener("touchmove", e=>{
+    if(!active) return;
+    dy = e.touches[0].clientY - y0;
+    if(dy <= 0 || window.scrollY > 0){ el.style.opacity = 0; return; }
+    const d = Math.min(dy * 0.5, 90);
+    el.style.transition = "none"; el.style.opacity = Math.min(1, dy / 90);
+    el.style.transform = `translateY(${d - 40}px) rotate(${dy * 2}deg)`;
+  }, {passive: true});
+  addEventListener("touchend", ()=>{
+    if(!active) return; active = false; el.style.transition = "";
+    if(dy * 0.5 > 60 && window.scrollY <= 0){ el.classList.add("go"); el.style.opacity = 1; el.style.transform = "translateY(24px)"; setTimeout(()=>location.reload(), 350); }
+    else { el.style.transform = "translateY(-70px)"; el.style.opacity = 0; }
+  });
 })();
 route();
 loadSiteData();
