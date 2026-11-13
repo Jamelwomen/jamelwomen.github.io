@@ -342,6 +342,10 @@ header{padding-top:env(safe-area-inset-top,0px)}
 @media (orientation:portrait) and (min-width:441px) and (max-width:600px){
   .hdr-act{margin-right:max(env(safe-area-inset-right,0px),64px)}
 }
+/* внутренний (раскрытый) экран iPhone Duo: тоже чуть левее, не под камерой */
+@media (orientation:portrait) and (min-width:601px) and (max-width:800px){
+  .hdr-act{margin-right:calc(env(safe-area-inset-right,0px) + 56px)}
+}
 footer{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 30px)}
 .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 24px)}
 .adm-toggle{left:calc(env(safe-area-inset-left,0px) + 16px);bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
@@ -1538,7 +1542,7 @@ renderAll(); renderContacts();
   });
 })();
 /* автообновление: если на сайте вышла новая версия — сразу загрузить её, без старой копии из кэша */
-const BUILD = "20261114010157";
+const BUILD = "20261114010316";
 async function checkNewVersion(){
   if(!GH) return;
   try{
