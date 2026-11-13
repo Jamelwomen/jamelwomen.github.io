@@ -320,10 +320,7 @@ body.edit .adm-toggle{background:#c49a86;color:#fff}
 #ptr.go svg{animation:ptrspin .7s linear infinite}
 @keyframes ptrspin{to{transform:rotate(360deg)}}
 /* на весь экран: без полос по краям, с учётом выреза и строки состояния */
-html,body{width:100%;overflow-x:clip}
-@supports not (overflow-x:clip){body{overflow-x:hidden}}
-/* шапка закреплена сверху и всегда поверх карусели */
-header{z-index:500}
+html,body{width:100%;overflow-x:hidden}
 .wrap,.tc,.tcwrap,.drawer{max-width:none!important}
 /* iPhone Duo: справа отступ под вырез не делаем (как в Коране) — контент до края; слева вырез учитываем только в горизонтальном положении */
 .wrap{padding-left:20px;padding-right:20px}
@@ -345,14 +342,11 @@ header{padding-top:env(safe-area-inset-top,0px)}
 @media (orientation:portrait) and (min-width:441px) and (max-width:600px){
   .hdr-act{margin-right:max(env(safe-area-inset-right,0px),64px)}
 }
-/* внутренний (раскрытый) экран iPhone Duo: тоже чуть левее, не под камерой */
-@media (orientation:portrait) and (min-width:601px) and (max-width:800px){
-  .hdr-act{margin-right:calc(env(safe-area-inset-right,0px) + 120px);gap:8px}
-  .login,.bag{width:34px;height:34px;padding:0!important;justify-content:center;border-radius:50%}
-  .bag{background:transparent;color:var(--ink);border:1.5px solid var(--ink);box-shadow:none}
-  .bag:hover{background:var(--ink);color:#f3ead9}
-  .bag b,.bag .t{display:none}
-  .login .ico,.bag .ico{width:16px;height:16px}
+/* внутренний (раскрытый) экран iPhone Duo: вход и корзина как на переднем экране, левее — не под часами */
+@media (min-width:601px) and (max-width:1400px) and (hover:none) and (pointer:coarse){
+  .hdr-act{margin-right:calc(env(safe-area-inset-right,0px) + 110px)}
+  .login .t,.bag .t{display:none}
+  .login{padding:8px 10px}.bag{padding:8px 12px}
 }
 footer{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 30px)}
 .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 24px)}
@@ -1550,7 +1544,7 @@ renderAll(); renderContacts();
   });
 })();
 /* автообновление: если на сайте вышла новая версия — сразу загрузить её, без старой копии из кэша */
-const BUILD = "20261114010952";
+const BUILD = "20261114011351";
 async function checkNewVersion(){
   if(!GH) return;
   try{
