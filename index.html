@@ -946,6 +946,19 @@ function route(){
   }
 }
 window.addEventListener("hashchange", route);
+/* сложили/раскрыли телефон — Safari не пересчитывает закреплённую шапку и наложение карусели; пересчитываем сами */
+(function(){
+  let t;
+  function refix(){
+    const h = document.querySelector("header"), a = document.querySelector(".arc-sec");
+    if(h){ h.style.position = "static"; void h.offsetHeight; h.style.position = ""; }
+    if(a){ a.style.zIndex = "auto"; void a.offsetHeight; a.style.zIndex = ""; }
+  }
+  function later(){ clearTimeout(t); refix(); t = setTimeout(refix, 350); setTimeout(refix, 900); }
+  addEventListener("resize", later);
+  addEventListener("orientationchange", later);
+  if(window.visualViewport) visualViewport.addEventListener("resize", later);
+})();
 /* при открытии/обновлении главной — всегда с самого верха страницы, а не с «Выберите категорию» */
 try{ history.scrollRestoration = "manual"; }catch(e){}
 (function(){
@@ -1556,7 +1569,7 @@ renderAll(); renderContacts();
   });
 })();
 /* автообновление: если на сайте вышла новая версия — сразу загрузить её, без старой копии из кэша */
-const BUILD = "20261114012906";
+const BUILD = "20261114013411";
 async function checkNewVersion(){
   if(!GH) return;
   try{
