@@ -946,19 +946,26 @@ function route(){
   }
 }
 window.addEventListener("hashchange", route);
-/* сложили/раскрыли телефон — Safari не пересчитывает закреплённую шапку и наложение карусели; пересчитываем сами */
+/* сложили/раскрыли телефон — страница тихо перезагружается под новый экран, чтобы шапка и карусель работали как надо */
 (function(){
-  let t;
-  function refix(){
-    const h = document.querySelector("header"), a = document.querySelector(".arc-sec");
-    if(h){ h.style.position = "static"; void h.offsetHeight; h.style.position = ""; }
-    if(a){ a.style.zIndex = "auto"; void a.offsetHeight; a.style.zIndex = ""; }
+  const big = () => innerWidth > 600;
+  let was = big(), t;
+  function check(){
+    if(big() === was) return;
+    was = big();
+    if(document.querySelector(".modal.on") || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) return;
+    try{ sessionStorage.setItem("jw_fold_y", String(scrollY)); }catch(e){}
+    location.replace(location.pathname + "?f=" + Date.now() + location.hash);
   }
-  function later(){ clearTimeout(t); refix(); t = setTimeout(refix, 350); setTimeout(refix, 900); }
-  addEventListener("resize", later);
-  addEventListener("orientationchange", later);
-  if(window.visualViewport) visualViewport.addEventListener("resize", later);
+  addEventListener("resize", ()=>{ clearTimeout(t); t = setTimeout(check, 250); });
+  try{ const y = sessionStorage.getItem("jw_fold_y"); if(y !== null){ sessionStorage.removeItem("jw_fold_y"); addEventListener("load", ()=>setTimeout(()=>scrollTo(0, +y), 50)); } }catch(e){}
 })();
+/* логотип Jamel Women — просто на главную, в самый верх страницы */
+document.querySelectorAll("a.logo").forEach(a=>a.addEventListener("click", e=>{
+  e.preventDefault();
+  if(location.hash){ history.pushState(null, "", location.pathname + location.search); route(); }
+  window.scrollTo({top:0, behavior:"instant"});
+}));
 /* при открытии/обновлении главной — всегда с самого верха страницы, а не с «Выберите категорию» */
 try{ history.scrollRestoration = "manual"; }catch(e){}
 (function(){
@@ -1569,7 +1576,7 @@ renderAll(); renderContacts();
   });
 })();
 /* автообновление: если на сайте вышла новая версия — сразу загрузить её, без старой копии из кэша */
-const BUILD = "20261114013411";
+const BUILD = "20261114013654";
 async function checkNewVersion(){
   if(!GH) return;
   try{
