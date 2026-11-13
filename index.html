@@ -322,12 +322,21 @@ body.edit .adm-toggle{background:#c49a86;color:#fff}
 /* на весь экран: без полос по краям, с учётом выреза и строки состояния */
 html,body{width:100%;overflow-x:hidden}
 .wrap,.tc,.tcwrap,.drawer{max-width:none!important}
-.wrap{padding-left:calc(env(safe-area-inset-left,0px) + 20px);padding-right:calc(env(safe-area-inset-right,0px) + 20px)}
+/* iPhone Duo: справа отступ под вырез не делаем (как в Коране) — контент до края; слева вырез учитываем только в горизонтальном положении */
+.wrap{padding-left:20px;padding-right:20px}
 header{padding-top:env(safe-area-inset-top,0px)}
-.tcwrap{padding-left:calc(env(safe-area-inset-left,0px) + 20px)}
-.tcwrap .tc{padding-right:calc(env(safe-area-inset-right,0px) + 20px)}
-.drawer{padding-left:calc(env(safe-area-inset-left,0px) + 20px);padding-right:calc(env(safe-area-inset-right,0px) + 20px)}
-.rail{margin-left:calc(-20px - env(safe-area-inset-left,0px));margin-right:calc(-20px - env(safe-area-inset-right,0px));padding-left:calc(env(safe-area-inset-left,0px) + 20px);padding-right:calc(env(safe-area-inset-right,0px) + 20px)}
+.tcwrap{padding-left:20px}
+.tcwrap .tc{padding-right:20px}
+.drawer{padding-left:20px;padding-right:20px}
+.rail{margin-left:-20px;margin-right:-20px;padding-left:20px;padding-right:20px}
+@media (orientation:landscape){
+  .wrap,.drawer{padding-left:calc(env(safe-area-inset-left,0px) + 20px)}
+  .tcwrap{padding-left:calc(env(safe-area-inset-left,0px) + 20px)}
+  .rail{margin-left:calc(-20px - env(safe-area-inset-left,0px));padding-left:calc(env(safe-area-inset-left,0px) + 20px)}
+}
+@media (orientation:portrait){
+  header,.topcats,main,footer{margin-right:calc(-1 * env(safe-area-inset-right,0px))}
+}
 footer{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 30px)}
 .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 24px)}
 .adm-toggle{left:calc(env(safe-area-inset-left,0px) + 16px);bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
@@ -1475,7 +1484,7 @@ renderAll(); renderContacts();
   });
 })();
 /* автообновление: если на сайте вышла новая версия — сразу загрузить её, без старой копии из кэша */
-const BUILD = "20261113171417";
+const BUILD = "20261113172122";
 async function checkNewVersion(){
   if(!GH) return;
   try{
