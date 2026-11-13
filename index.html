@@ -1275,6 +1275,32 @@ $("#admForm").addEventListener("submit", async e=>{
 });
 $("#exportBtn").onclick = exportSite;
 /* ---------- ключ GitHub ---------- */
+/* ключ хранится в репозитории зашифрованным паролем входа — на новом устройстве достаточно пароля */
+async function pwdKey(pwd, salt){
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode("jw:" + pwd), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({name: "PBKDF2", salt, iterations: 600000, hash: "SHA-256"}, base, {name: "AES-GCM", length: 256}, false, ["encrypt", "decrypt"]);
+}
+const toB64 = buf => { let s = ""; new Uint8Array(buf).forEach(b => s += String.fromCharCode(b)); return btoa(s); };
+const fromB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function saveSharedKey(tok){
+  const pwd = KEY(); if(!pwd) throw 0;
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  const k = await pwdKey(pwd, salt);
+  const c = await crypto.subtle.encrypt({name: "AES-GCM", iv}, k, new TextEncoder().encode(tok));
+  await ghPut("data/key.json", b64utf8(JSON.stringify({s: toB64(salt), i: toB64(iv), c: toB64(c)})), "Ключ для входа");
+}
+async function loadSharedKey(){
+  const pwd = KEY(); if(!pwd) return false;
+  try{
+    const r = await fetch("data/key.json?v=" + Date.now(), {cache: "no-store"}); if(!r.ok) return false;
+    const j = await r.json(); const k = await pwdKey(pwd, fromB64(j.s));
+    const t = new TextDecoder().decode(await crypto.subtle.decrypt({name: "AES-GCM", iv: fromB64(j.i)}, k, fromB64(j.c)));
+    localStorage.setItem("jw_gh", t); return true;
+  }catch(e){ return false; }
+}
+async function ensureSharedKey(){
+  try{ const r = await fetch("data/key.json?v=" + Date.now(), {cache: "no-store"}); if(r.status === 404) await saveSharedKey(GH_TOKEN()); }catch(e){}
+}
 function askToken(){ if(!GH) return; $("#ghTok").value = ""; $("#ghErr").textContent = ""; $("#ghModal").classList.add("on"); setTimeout(()=>$("#ghTok").focus(), 60); }
 $("#ghModal").addEventListener("click", e=>{ if(e.target.id==="ghModal" || e.target.closest("#ghX")) $("#ghModal").classList.remove("on"); });
 $("#ghForm").addEventListener("submit", async e=>{
@@ -1287,7 +1313,8 @@ $("#ghForm").addEventListener("submit", async e=>{
     if(!r.ok){ $("#ghErr").textContent = r.status === 401 ? "Ключ не подходит" : "Нет доступа к репозиторию " + GH.repo; return; }
     if(j.permissions && !j.permissions.push){ $("#ghErr").textContent = "У ключа нет права записи (Contents: Read and write)"; return; }
     try{ localStorage.setItem("jw_gh", t); }catch(err){}
-    $("#ghModal").classList.remove("on"); updNote(); toast("GitHub подключён ✓");
+    $("#ghModal").classList.remove("on"); updNote();
+    try{ await saveSharedKey(t); toast("GitHub подключён ✓ — на других устройствах ключ не нужен"); }catch(err){ toast("GitHub подключён ✓"); }
   }catch(err){ $("#ghErr").textContent = "Нет связи с GitHub"; }
 });
 /* ---------- категории ---------- */
@@ -1355,7 +1382,10 @@ function setLogged(on){
   $("#loginBtn").classList.toggle("on", on);
   $("#loginBtn").innerHTML = on ? '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="t">Выйти</span>' : '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/></svg><span class="t">Вход</span>';
   setEdit(on);
-  if(on && GH && !GH_TOKEN()) setTimeout(askToken, 500);
+  if(on && GH){
+    if(GH_TOKEN()) ensureSharedKey();
+    else loadSharedKey().then(ok=>{ if(ok){ updNote(); toast("GitHub подключён автоматически ✓"); } else askToken(); });
+  }
 }
 $("#loginBtn").onclick = ()=>{
   if(EDIT){ setLogged(false); return; }
