@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -320,10 +320,9 @@ body.edit .adm-toggle{background:#c49a86;color:#fff}
 #ptr.go svg{animation:ptrspin .7s linear infinite}
 @keyframes ptrspin{to{transform:rotate(360deg)}}
 /* на весь экран: без полос по краям, с учётом выреза и строки состояния */
-html,body{width:100%;overflow-x:clip}
-@supports not (overflow-x:clip){body{overflow-x:hidden}}
-/* при прокрутке весь блок «Выберите категорию» с каруселью проходит поверх шапки и категорий (на обоих экранах) */
-.arc-sec{z-index:45}
+html,body{width:100%;overflow-x:hidden}
+/* iPhone не приближает страницу при нажатии на поле ввода (текст в полях не мельче 16px) */
+@media (hover:none) and (pointer:coarse){input,select,textarea{font-size:16px!important}}
 .wrap,.tc,.tcwrap,.drawer{max-width:none!important}
 /* iPhone Duo: справа отступ под вырез не делаем (как в Коране) — контент до края; слева вырез учитываем только в горизонтальном положении */
 .wrap{padding-left:20px;padding-right:20px}
@@ -946,20 +945,6 @@ function route(){
   }
 }
 window.addEventListener("hashchange", route);
-/* сложили/раскрыли телефон — страница тихо перезагружается под новый экран, чтобы шапка и карусель работали как надо */
-(function(){
-  const big = () => innerWidth > 600;
-  let was = big(), t;
-  function check(){
-    if(big() === was) return;
-    was = big();
-    if(document.querySelector(".modal.on") || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) return;
-    try{ sessionStorage.setItem("jw_fold_y", String(scrollY)); }catch(e){}
-    location.replace(location.pathname + "?f=" + Date.now() + location.hash);
-  }
-  addEventListener("resize", ()=>{ clearTimeout(t); t = setTimeout(check, 250); });
-  try{ const y = sessionStorage.getItem("jw_fold_y"); if(y !== null){ sessionStorage.removeItem("jw_fold_y"); addEventListener("load", ()=>setTimeout(()=>scrollTo(0, +y), 50)); } }catch(e){}
-})();
 /* логотип Jamel Women — просто на главную, в самый верх страницы */
 document.querySelectorAll("a.logo").forEach(a=>a.addEventListener("click", e=>{
   e.preventDefault();
@@ -1576,7 +1561,7 @@ renderAll(); renderContacts();
   });
 })();
 /* автообновление: если на сайте вышла новая версия — сразу загрузить её, без старой копии из кэша */
-const BUILD = "20261114013654";
+const BUILD = "20261114014117";
 async function checkNewVersion(){
   if(!GH) return;
   try{
