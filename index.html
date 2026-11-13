@@ -345,7 +345,7 @@ header{padding-top:env(safe-area-inset-top,0px)}
 }
 /* внутренний (раскрытый) экран iPhone Duo: вход и корзина как на переднем экране, левее — не под часами */
 @media (min-width:601px) and (max-width:1400px) and (hover:none) and (pointer:coarse){
-  .hdr-act{margin-right:calc(env(safe-area-inset-right,0px) + 50px)}
+  .hdr-act{margin-right:calc(env(safe-area-inset-right,0px) + 4px)}
   .login .t,.bag .t{display:none}
   .login{padding:8px 10px}.bag{padding:8px 12px}
 }
@@ -1554,7 +1554,7 @@ renderAll(); renderContacts();
   });
 })();
 /* автообновление: если на сайте вышла новая версия — сразу загрузить её, без старой копии из кэша */
-const BUILD = "20261114012310";
+const BUILD = "20261114012451";
 async function checkNewVersion(){
   if(!GH) return;
   try{
