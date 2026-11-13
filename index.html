@@ -387,6 +387,16 @@ footer{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 30px)}
 .mbox{max-width:min(1100px,96vw)!important}
 .mbox.ok{max-width:480px!important}
 #admModal .mbox,#shopModal .mbox,#catModal .mbox,#ghModal .mbox,#loginModal .mbox{max-width:min(520px,94vw)!important}
+/* компактное окно входа */
+#loginModal .mbox{max-width:min(290px,88vw)!important;padding:18px 18px 16px!important;border-radius:22px}
+#loginModal .lgt{font-size:24px;line-height:1.1}
+#loginModal .note{font-size:12.5px;margin-top:2px}
+#loginModal .x{width:30px;height:30px;font-size:13px}
+#loginForm{gap:8px;margin-top:10px}
+#loginForm label{font-size:13px}
+#loginForm input{padding:9px 12px;margin-top:4px}
+#loginForm .btn{padding:10px 16px;font-size:14px}
+#lErr:empty{display:none}
 /* якоря не уходят под шапку */
 section{scroll-margin-top:150px}
 #showcase{scroll-margin-top:1000px}
@@ -591,7 +601,7 @@ textarea{resize:vertical;min-height:70px}
 <p class="note" style="margin:0 0 10px">Один раз вставьте ключ доступа GitHub. Сайт сохранит его зашифрованным вашим паролем — на других устройствах будет достаточно пароля.</p>
 <form id="ghForm" novalidate><label>Ключ доступа<input id="ghTok" type="password" autocomplete="off" placeholder="github_pat_…"></label><div class="err" id="ghErr"></div>
 <button class="btn btn-p" type="submit" style="justify-content:center;padding:12px">Войти</button></form></div></div>
-<div class="modal" id="loginModal"><div class="mbox"><button class="x" id="loginX" type="button" style="position:absolute;top:14px;right:14px">✕</button><h3 style="font-size:32px">Вход</h3><p class="note">Для владельца магазина</p>
+<div class="modal" id="loginModal"><div class="mbox"><button class="x" id="loginX" type="button" style="position:absolute;top:10px;right:10px">✕</button><h3 class="lgt">Вход</h3><p class="note">Для владельца магазина</p>
 <form id="loginForm" novalidate><label>Пароль<input id="lPwd" type="password" inputmode="numeric" autocomplete="current-password"></label><div class="err" id="lErr"></div><button class="btn btn-p" type="submit" style="justify-content:center">Войти</button></form></div></div>
 <div id="ptr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4.5h-4.5"/></svg></div>
 <div class="toast" id="toast"></div>
@@ -1524,7 +1534,7 @@ renderAll(); renderContacts();
   });
 })();
 /* автообновление: если на сайте вышла новая версия — сразу загрузить её, без старой копии из кэша */
-const BUILD = "20261114005838";
+const BUILD = "20261114010031";
 async function checkNewVersion(){
   if(!GH) return;
   try{
