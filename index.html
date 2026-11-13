@@ -331,6 +331,13 @@ header{padding-top:env(safe-area-inset-top,0px)}
 footer{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 30px)}
 .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 24px)}
 .adm-toggle{left:calc(env(safe-area-inset-left,0px) + 16px);bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
+/* разделы тоже на всю ширину: карточки растягиваются, без пустого места справа */
+.grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))!important}
+@media(max-width:560px){.grid{grid-template-columns:1fr 1fr!important}}
+.grid > .card{max-width:none}
+.mbox{max-width:min(1100px,96vw)!important}
+.mbox.ok{max-width:480px!important}
+#admModal .mbox,#shopModal .mbox,#catModal .mbox,#ghModal .mbox,#loginModal .mbox{max-width:min(520px,94vw)!important}
 /* якоря не уходят под шапку */
 section{scroll-margin-top:150px}
 #showcase{scroll-margin-top:1000px}
