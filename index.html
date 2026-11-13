@@ -1470,10 +1470,22 @@ renderAll(); renderContacts();
   }, {passive: true});
   addEventListener("touchend", ()=>{
     if(!active) return; active = false; el.style.transition = "";
-    if(dy * 0.5 > 60 && window.scrollY <= 0){ el.classList.add("go"); el.style.opacity = 1; el.style.transform = "translateY(24px)"; setTimeout(()=>location.reload(), 350); }
+    if(dy * 0.5 > 60 && window.scrollY <= 0){ el.classList.add("go"); el.style.opacity = 1; el.style.transform = "translateY(24px)"; setTimeout(()=>location.replace(location.pathname + "?r=" + Date.now() + location.hash), 350); }
     else { el.style.transform = "translateY(-70px)"; el.style.opacity = 0; }
   });
 })();
+/* автообновление: если на сайте вышла новая версия — сразу загрузить её, без старой копии из кэша */
+const BUILD = "20261113171417";
+async function checkNewVersion(){
+  if(!GH) return;
+  try{
+    const r = await fetch(location.pathname + "?nocache=" + Date.now(), {cache: "no-store"}); if(!r.ok) return;
+    const m = (await r.text()).match(/const BUILD = "(\d+)"/);
+    if(m && m[1] !== BUILD) location.replace(location.pathname + "?v=" + m[1] + location.hash);
+  }catch(e){}
+}
+checkNewVersion();
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) checkNewVersion(); });
 route();
 loadSiteData();
 try{ if(sessionStorage.getItem("jw_admin")) setLogged(true); }catch(e){}
