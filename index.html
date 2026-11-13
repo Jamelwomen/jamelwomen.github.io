@@ -512,7 +512,7 @@ textarea{resize:vertical;min-height:70px}
 <button class="btn btn-p" type="submit" style="justify-content:center;padding:12px">Сохранить</button>
 </form></div></div>
 <div class="modal" id="ghModal"><div class="mbox"><button class="x" id="ghX" type="button" style="position:absolute;top:14px;right:14px">✕</button><h3 style="font-size:26px;margin-bottom:6px">Вход для владельца</h3>
-<p class="note" style="margin:0 0 10px">Один раз на этом устройстве вставьте ключ доступа GitHub. Дальше кнопка «Вход» будет открывать редактирование сразу, без пароля. Ключ остаётся только в этом телефоне.</p>
+<p class="note" style="margin:0 0 10px">Один раз вставьте ключ доступа GitHub. Сайт сохранит его зашифрованным вашим паролем — на других устройствах будет достаточно пароля.</p>
 <form id="ghForm" novalidate><label>Ключ доступа<input id="ghTok" type="password" autocomplete="off" placeholder="github_pat_…"></label><div class="err" id="ghErr"></div>
 <button class="btn btn-p" type="submit" style="justify-content:center;padding:12px">Войти</button></form></div></div>
 <div class="modal" id="loginModal"><div class="mbox"><button class="x" id="loginX" type="button" style="position:absolute;top:14px;right:14px">✕</button><h3 style="font-size:32px">Вход</h3><p class="note">Для владельца магазина</p>
@@ -1314,7 +1314,9 @@ $("#ghForm").addEventListener("submit", async e=>{
     if(j.permissions && !j.permissions.push){ $("#ghErr").textContent = "У ключа нет права записи (Contents: Read and write)"; return; }
     try{ localStorage.setItem("jw_gh", t); }catch(err){}
     $("#ghModal").classList.remove("on");
-    if(!EDIT) setLogged(true); else { updNote(); toast("Ключ обновлён ✓"); }
+    let shared = false; try{ await saveSharedKey(t); shared = true; }catch(err){}
+    if(!EDIT) setLogged(true); else updNote();
+    toast(shared ? "GitHub подключён ✓ — на других устройствах хватит пароля" : "GitHub подключён ✓");
   }catch(err){ $("#ghErr").textContent = "Нет связи с GitHub"; }
 });
 /* ---------- категории ---------- */
@@ -1382,12 +1384,15 @@ function setLogged(on){
   $("#loginBtn").classList.toggle("on", on);
   $("#loginBtn").innerHTML = on ? '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="t">Выйти</span>' : '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/></svg><span class="t">Вход</span>';
   setEdit(on);
-
+  if(on && GH && KEY()){
+    if(GH_TOKEN()) ensureSharedKey();
+    else loadSharedKey().then(ok=>{ if(ok){ updNote(); toast("GitHub подключён автоматически ✓"); } else askToken(); });
+  }
 }
 $("#loginBtn").onclick = ()=>{
   if(EDIT){ setLogged(false); return; }
-  if(GH && !GH_TOKEN()){ askToken(); return; }   // на этом устройстве ещё нет ключа — спросить один раз
-  setLogged(true);
+  $("#lPwd").value = ""; $("#lErr").textContent = "";
+  $("#loginModal").classList.add("on"); setTimeout(()=>$("#lPwd").focus(), 60);
 };
 $("#loginModal").addEventListener("click", e=>{ if(e.target.id==="loginModal" || e.target.closest("#loginX")) $("#loginModal").classList.remove("on"); });
 $("#loginForm").addEventListener("submit", async e=>{
