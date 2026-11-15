@@ -1160,7 +1160,7 @@ let DATA = {catImg:{}, prodImg:{}, products:[], edits:{}, removed:[], shop:{}, o
 const API = /netlify\.app$/.test(location.hostname) ? "" : "https://jamelwomen.netlify.app";
 /* GitHub: сайт на github.io хранит фото и данные прямо в своём репозитории */
 const GH = (()=>{ const m = location.hostname.match(/^([^.]+)\.github\.io$/i); if(!m) return null;
-  const repo = location.pathname.split("/").filter(Boolean)[0] || (m[1] + ".github.io"); return {owner: m[1], repo, branch: "main"}; })();
+  let repo = location.pathname.split("/").filter(Boolean)[0]; if(!repo || /\.html?$/i.test(repo)) repo = m[1] + ".github.io"; return {owner: m[1], repo, branch: "main"}; })();
 const GH_TOKEN = () => { try{ return localStorage.getItem("jw_gh") || ""; }catch(e){ return ""; } };
 const PREVIEW = {}, GHSHA = {};
 const b64utf8 = str => btoa(unescape(encodeURIComponent(str)));
@@ -1564,7 +1564,7 @@ renderAll(); renderContacts();
   });
 })();
 /* автообновление: если на сайте вышла новая версия — сразу загрузить её, без старой копии из кэша */
-const BUILD = "20261114014542";
+const BUILD = "20261115231728";
 async function checkNewVersion(){
   if(!GH) return;
   try{
