@@ -948,6 +948,8 @@ function route(){
   }
 }
 window.addEventListener("hashchange", route);
+/* сайт сохраняется на телефоне и открывается сразу, без повторной загрузки (обновления подтягиваются в фоне) */
+if("serviceWorker" in navigator && /github\.io$/i.test(location.hostname)){ try{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){} }
 /* логотип Jamel Women — просто на главную, в самый верх страницы */
 document.querySelectorAll("a.logo").forEach(a=>a.addEventListener("click", e=>{
   e.preventDefault();
@@ -1564,7 +1566,7 @@ renderAll(); renderContacts();
   });
 })();
 /* автообновление: если на сайте вышла новая версия — сразу загрузить её, без старой копии из кэша */
-const BUILD = "20261115231728";
+const BUILD = "20261117162351";
 async function checkNewVersion(){
   if(!GH) return;
   try{
